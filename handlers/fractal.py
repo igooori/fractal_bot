@@ -5,8 +5,7 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from states.fractal_states import Fract
 from aiogram.types import BufferedInputFile
-from keyboards.inline import keyboard_fractal,kebyoard_size,keyboard_color
-from keyboards.reply import keyboard_gotovo
+from keyboards.inline import keyboard_fractal,kebyoard_size,keyboard_color, keyboard_gotovo
 from sqlalchemy.orm import Session
 from models.base import Histori,engine
 txt = """<b>🎨 ВЫБЕРИТЕ ФРАКТАЛ</b>

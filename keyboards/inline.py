@@ -15,4 +15,7 @@ keyboard_color = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(tex
                                                      InlineKeyboardButton(text='красный',callback_data='color:red'),
                                                      InlineKeyboardButton(text='зеленый',callback_data='color:green')]])
 
+keyboard_gotovo = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='➡️ ДАЛЕЕ',callback_data='gotovo')]])
+
+
 
