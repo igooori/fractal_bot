@@ -24,23 +24,22 @@ TEXT_SERPINSKI = """<b>📐 Введите глубину рекурсии:</b> 
 🚀 <b>Введите целое число от 0 до 10:</b>"""
 
 
-TEXT_MANDELBROT = """<b>🔢 Введите число:</b> от <b>20</b> до <b>1000</b>
+TEXT_MANDELBROT = """<b>🔢 Введите число от 20 до 100</b>
 
 ⚡ <b>Что это такое?</b>
-Это количество итераций для расчёта фрактала
+Это максимальное количество итераций для расчёта фрактала.
 
 📊 <b>Как влияет:</b>
-✅ Больше число = больше деталей
-⏱️ Больше число = дольше ждать
+• Больше итераций — точнее расчёт границы фрактала
+• Больше итераций — дольше генерация
+• Большой размер изображения тоже увеличивает время ожидания
 
-🎯 <b>Рекомендации по размерам:</b>
-• 512×512 → 100–200
-• 1024×1024 → 200–400
-• 2048×2048 → 400–800
+💡 <b>Примеры:</b>
+<code>20</code>, <code>50</code>, <code>100</code>
 
-💡 <b>Примеры:</b> 100, 250, 500, 750
+🎯 Для первого раза попробуйте <b>50</b>.
 
-🚀 <b>Введите целое число от 20 до 1000:</b>"""
+🚀 <b>Введите целое число от 20 до 100:</b>"""
 
 
 TEXT_KOCH = """<b>❄️ Введите глубину:</b> от <b>0</b> до <b>7</b>
@@ -239,7 +238,7 @@ async def parametr(message:Message,state:FSMContext):
         if not message.text.isdigit():
             await message.answer(TEXT_SERPINSKI,parse_mode='HTML')
             return
-        elif int(message.text) > 10:
+        elif not 0 <= int(message.text) <= 10:
             await message.answer('❌ ошибка введите от 0 до 10')
         else:
             await message.answer('✅ Числа сохранены! Генерирую фрактал...')
@@ -256,17 +255,17 @@ async def parametr(message:Message,state:FSMContext):
                     user_id = message.from_user.id,
                     parameters = data
                 )
-            db.add(hustori)
-            db.commit()
+                db.add(hustori)
+                db.commit()
             await state.clear()
     if fractal_type == 'mandelbrot':
         if not message.text.isdigit():
             await message.answer(TEXT_MANDELBROT,parse_mode='HTML')
             return
-        elif int(message.text) < 21:
-            await message.answer('❌ ошибка введите от 20 до 1000')
-        elif int(message.text) > 101:
-            await message.answer('❌ ошибка введите от 20 до 1000')
+        elif int(message.text) < 20:
+            await message.answer('❌ ошибка введите от 20 до 100')
+        elif int(message.text) > 100:
+            await message.answer('❌ ошибка введите от 20 до 100')
         else:
             await message.answer('✅ Числа сохранены! Генерирую фрактал...')
             size = data['size']
@@ -283,8 +282,8 @@ async def parametr(message:Message,state:FSMContext):
                     user_id = message.from_user.id,
                     parameters = data
                 )
-            db.add(hustori)
-            db.commit()
+                db.add(hustori)
+                db.commit()
             await state.clear()
     if fractal_type == 'koch':
         if not message.text.isdigit():
@@ -306,8 +305,8 @@ async def parametr(message:Message,state:FSMContext):
                     user_id = message.from_user.id,
                     parameters = data
             )
-            db.add(hustori)
-            db.commit()
+                db.add(hustori)
+                db.commit()
             await state.clear()
     if fractal_type == 'pifagor':
         if not message.text.isdigit():

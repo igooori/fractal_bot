@@ -47,7 +47,6 @@ def genraitate_mandelbrot(max_it,color_name,pixel_x:int,pixel_y:int,width:int,he
     math_y = (pixel_y / height - 0.5) * (2.0 / scale) + center_y
     zx,zy = 0,0
     ite = 0
-    max_it = 100
     while ite < max_it:
         if zx*zx + zy*zy > 4:
             break
