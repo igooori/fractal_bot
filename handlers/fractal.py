@@ -8,6 +8,100 @@ from aiogram.types import BufferedInputFile
 from keyboards.inline import keyboard_fractal,kebyoard_size,keyboard_color, keyboard_gotovo
 from sqlalchemy.orm import Session
 from models.base import Histori,engine
+TEXT_SERPINSKI = """<b>📐 Введите глубину рекурсии:</b> от <b>0</b> до <b>10</b>
+
+✨ <b>Что это значит?</b>
+Глубина определяет, насколько детальным будет треугольник
+
+🔄 <b>Как работает:</b>
+• 0–3 — простые формы
+• 4–7 — хорошо видна структура
+• 8–10 — максимальная детализация
+
+🎨 <b>Рекомендации:</b>
+Для первого раза попробуйте 5–7
+
+🚀 <b>Введите целое число от 0 до 10:</b>"""
+
+
+TEXT_MANDELBROT = """<b>🔢 Введите число:</b> от <b>20</b> до <b>1000</b>
+
+⚡ <b>Что это такое?</b>
+Это количество итераций для расчёта фрактала
+
+📊 <b>Как влияет:</b>
+✅ Больше число = больше деталей
+⏱️ Больше число = дольше ждать
+
+🎯 <b>Рекомендации по размерам:</b>
+• 512×512 → 100–200
+• 1024×1024 → 200–400
+• 2048×2048 → 400–800
+
+💡 <b>Примеры:</b> 100, 250, 500, 750
+
+🚀 <b>Введите целое число от 20 до 1000:</b>"""
+
+
+TEXT_KOCH = """<b>❄️ Введите глубину:</b> от <b>0</b> до <b>7</b>
+
+⚡ <b>Что это такое?</b>
+Уровень рекурсии для фрактала Коха
+
+📊 <b>Как влияет:</b>
+✅ Больше число = больше деталей
+⏱️ Больше число = дольше ждать
+
+🎯 <b>Рекомендации по размерам:</b>
+• 512×512 → 3–5
+• 1024×1024 → 4–6
+• 2048×2048 → 5–7
+
+💡 <b>Примеры:</b> 3, 4, 5, 6
+
+🚀 <b>Введите целое число от 0 до 7:</b>"""
+
+
+TEXT_PIFAGOR = """<b>🌳 Введите глубину дерева:</b> от <b>0</b> до <b>10</b>
+
+⚡ <b>Что это такое?</b>
+Уровень рекурсии для дерева Пифагора
+
+📊 <b>Как влияет:</b>
+✅ Больше число = больше ветвей
+🌿 Больше число = пышнее крона
+⏱️ Больше число = дольше ждать
+
+🎯 <b>Рекомендации по размерам:</b>
+• 512×512 → 4–6
+• 1024×1024 → 5–8
+• 2048×2048 → 6–10
+
+💡 <b>Примеры:</b> 5, 6, 7, 8
+
+🚀 <b>Введите целое число от 0 до 10:</b>"""
+
+
+TEXT_JULIA = """<b>🔢 Введите ДВА числа через пробел</b>
+
+⚡ <b>Что это такое?</b>
+Действительная и мнимая части параметра C.
+Они определяют форму фрактала Жюлиа.
+
+📌 <b>Диапазон:</b>
+Каждое число — от <b>-3</b> до <b>3</b>
+
+💡 <b>Пример:</b>
+<code>-0.7 0.27</code>
+
+⚠️ <b>Важно:</b>
+• Отправьте оба числа одним сообщением
+• Разделите числа пробелом
+• Дробную часть отделяйте точкой
+
+🚀 <b>Введите два числа:</b>"""
+
+
 txt = """<b>🎨 ВЫБЕРИТЕ ФРАКТАЛ</b>
 
 🌀 <b>Доступные варианты:</b>
@@ -123,27 +217,18 @@ async def green(callback: CallbackQuery, state: FSMContext):
     await state.set_state(Fract.parametrs)
     await callback.answer()
 @router.callback_query(Fract.parametrs, F.data == "gotovo")
-async def gotovo(callback: CallbackQuery):
+async def gotovo(callback: CallbackQuery, state:FSMContext):
     await callback.answer()
+    data = await state.get_data()
 
-    txt = """<b>🔢 ВВЕДИТЕ ЧИСЛО</b>
-
-    <b>📌 Диапазон:</b> от <b>-3</b> до <b>3</b>
-
-    <b>💡 Примеры:</b>
-    • <code>-0.7</code> — классический Жюлиа
-    • <code>0.285</code> — красивый фрактал
-    • <code>0.0</code> — симметричный вариант
-    • <code>-0.8</code> — популярный параметр
-
-    <b>⚠️ Важно:</b>
-    - Только числа (можно дробные)
-    - Не текст, не символы
-    - От <b>-3.0</b> до <b>+3.0</b>
-
-    <b>🚀 Вводите число:</b>"""
-
-    await callback.message.edit_text(txt, parse_mode="HTML")
+    txt = {
+        "serpinski": TEXT_SERPINSKI,
+        "mandelbrot": TEXT_MANDELBROT,
+        "koch": TEXT_KOCH,
+        "pifagor": TEXT_PIFAGOR,
+        "julia": TEXT_JULIA,
+    }
+    await callback.message.edit_text(txt[data["Fractal"]], parse_mode="HTML")
 @router.message(Fract.parametrs)
 async def parametr(message:Message,state:FSMContext):
     parametrs = message.text
@@ -152,24 +237,7 @@ async def parametr(message:Message,state:FSMContext):
     fractal_type = data.get('Fractal')
     if fractal_type == 'serpinski':
         if not message.text.isdigit():
-            txt = """<b>📐 Введите глубину рекурсии:</b> от <b>0</b> до <b>10</b>
-
-✨ <b>Что это значит?</b>
-Глубина определяет, насколько детальным будет треугольник
-
-🔄 <b>Как работает:</b>
-• 0-3 — простые формы
-• 4-7 — хорошо видна структура  
-• 8-10 — максимальная детализация
-
-⚠️ <b>Внимание:</b>
-Глубина 10+ может создавать очень сложные изображения
-
-🎨 <b>Рекомендации:</b>
-Для первого раза попробуйте 5-7
-
-🚀 <b>Введите число от 0 до 10:</b>"""
-            await message.answer(txt,parse_mode='HTML')
+            await message.answer(TEXT_SERPINSKI,parse_mode='HTML')
             return
         elif int(message.text) > 10:
             await message.answer('❌ ошибка введите от 0 до 10')
@@ -193,24 +261,7 @@ async def parametr(message:Message,state:FSMContext):
             await state.clear()
     if fractal_type == 'mandelbrot':
         if not message.text.isdigit():
-            txt = """<b>🔢 Введите число:</b> от <b>20</b> до <b>1000</b>
-
-⚡ <b>Что это такое?</b>
-Это количество итераций для расчета фрактала
-
-📊 <b>Как влияет:</b>
-✅ Больше число = больше деталей
-⏱️ Больше число = дольше ждать
-
-🎯 <b>Рекомендации по размерам:</b>
-• 512x512 → 100-200
-• 1024x1024 → 200-400  
-• 2048x2048 → 400-800
-
-💡 <b>Примеры:</b> 100, 250, 500, 750
-
-🚀 <b>Вводите число:</b>"""
-            await message.answer(txt,parse_mode='HTML')
+            await message.answer(TEXT_MANDELBROT,parse_mode='HTML')
             return
         elif int(message.text) < 21:
             await message.answer('❌ ошибка введите от 20 до 1000')
@@ -237,24 +288,7 @@ async def parametr(message:Message,state:FSMContext):
             await state.clear()
     if fractal_type == 'koch':
         if not message.text.isdigit():
-            txt = """<b>❄️ Введите глубину:</b> от <b>0</b> до <b>7</b>
-
-⚡ <b>Что это такое?</b>
-Уровень рекурсии для снежинки Коха
-
-📊 <b>Как влияет:</b>
-✅ Больше число = больше деталей
-⏱️ Больше число = дольше ждать
-
-🎯 <b>Рекомендации по размерам:</b>
-• 512x512 - 3-5
-• 1024x1024 - 4-6  
-• 2048x2048 - 5-7
-
-💡 <b>Примеры:</b> 3, 4, 5, 6
-
-🚀 <b>Вводите глубину:</b>"""
-            await message.answer(txt,parse_mode='HTML')
+            await message.answer(TEXT_KOCH,parse_mode='HTML')
             return
         elif int(message.text) > 8:
             await message.answer('❌ ошибка введите от 0 до 7')
@@ -277,25 +311,7 @@ async def parametr(message:Message,state:FSMContext):
             await state.clear()
     if fractal_type == 'pifagor':
         if not message.text.isdigit():
-            txt = """<b>🌳 Введите глубину дерева:</b> от <b>0</b> до <b>10</b>
-
-⚡ <b>Что это такое?</b>
-Уровень рекурсии для Дерева Пифагора
-
-📊 <b>Как влияет:</b>
-✅ Больше число = больше ветвей
-🌿 Больше число = пышнее крона
-⏱️ Больше число = дольше ждать
-
-🎯 <b>Рекомендации по размерам:</b>
-• 512x512 - 4-6
-• 1024x1024 - 5-8  
-• 2048x2048 - 6-10
-
-💡 <b>Примеры:</b> 5, 6, 7, 8
-
-🚀 <b>Вводите глубину:</b>"""
-            await message.answer(txt,parse_mode='HTML')
+            await message.answer(TEXT_PIFAGOR,parse_mode='HTML')
             return
         elif int(message.text) > 10:
             await message.answer('❌ ошибка введите от 0 до 10')
