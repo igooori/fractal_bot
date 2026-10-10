@@ -122,6 +122,28 @@ async def green(callback: CallbackQuery, state: FSMContext):
     )
     await state.set_state(Fract.parametrs)
     await callback.answer()
+@router.callback_query(Fract.parametrs, F.data == "gotovo")
+async def gotovo(callback: CallbackQuery):
+    await callback.answer()
+
+    txt = """<b>🔢 ВВЕДИТЕ ЧИСЛО</b>
+
+    <b>📌 Диапазон:</b> от <b>-3</b> до <b>3</b>
+
+    <b>💡 Примеры:</b>
+    • <code>-0.7</code> — классический Жюлиа
+    • <code>0.285</code> — красивый фрактал
+    • <code>0.0</code> — симметричный вариант
+    • <code>-0.8</code> — популярный параметр
+
+    <b>⚠️ Важно:</b>
+    - Только числа (можно дробные)
+    - Не текст, не символы
+    - От <b>-3.0</b> до <b>+3.0</b>
+
+    <b>🚀 Вводите число:</b>"""
+
+    await callback.message.edit_text(txt, parse_mode="HTML")
 @router.message(Fract.parametrs)
 async def parametr(message:Message,state:FSMContext):
     parametrs = message.text
@@ -287,25 +309,7 @@ async def parametr(message:Message,state:FSMContext):
             file = BufferedInputFile(image.getvalue(),filename="fractal.png")
             await message.answer_photo(file,caption='Вот твой фрактал Дерево пифагора!')
             await state.clear()
-    if message.text == '➡️ ДАЛЕЕ':
-        txt = """<b>🔢 ВВЕДИТЕ ЧИСЛО</b>
 
-<b>📌 Диапазон:</b> от <b>-3</b> до <b>3</b>
-
-<b>💡 Примеры:</b>
-• <code>-0.7</code> — классический Жюлиа
-• <code>0.285</code> — красивый фрактал
-• <code>0.0</code> — симметричный вариант
-• <code>-0.8</code> — популярный параметр
-
-<b>⚠️ Важно:</b>
-- Только числа (можно дробные)
-- Не текст, не символы
-- От <b>-3.0</b> до <b>+3.0</b>
-
-<b>🚀 Вводите число:</b>"""
-        await message.answer(txt,parse_mode='HTML')
-        return
     if fractal_type == 'julia':
         parts = message.text.split()
         if len(parts) != 2:
