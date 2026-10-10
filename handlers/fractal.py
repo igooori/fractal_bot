@@ -8,6 +8,7 @@ from aiogram.types import BufferedInputFile
 from keyboards.inline import keyboard_fractal,kebyoard_size,keyboard_color, keyboard_gotovo
 from sqlalchemy.orm import Session
 from models.base import Histori,engine
+import math
 TEXT_SERPINSKI = """<b>📐 Введите глубину рекурсии:</b> от <b>0</b> до <b>10</b>
 
 ✨ <b>Что это значит?</b>
@@ -61,7 +62,7 @@ TEXT_KOCH = """<b>❄️ Введите глубину:</b> от <b>0</b> до <
 🚀 <b>Введите целое число от 0 до 7:</b>"""
 
 
-TEXT_PIFAGOR = """<b>🌳 Введите глубину дерева:</b> от <b>0</b> до <b>10</b>
+TEXT_PIFAGOR = """<b>🌳 Введите глубину дерева:</b> от <b>1</b> до <b>10</b>
 
 ⚡ <b>Что это такое?</b>
 Уровень рекурсии для дерева Пифагора
@@ -78,7 +79,7 @@ TEXT_PIFAGOR = """<b>🌳 Введите глубину дерева:</b> от <
 
 💡 <b>Примеры:</b> 5, 6, 7, 8
 
-🚀 <b>Введите целое число от 0 до 10:</b>"""
+🚀 <b>Введите целое число от 1 до 10:</b>"""
 
 
 TEXT_JULIA = """<b>🔢 Введите ДВА числа через пробел</b>
@@ -231,6 +232,9 @@ async def gotovo(callback: CallbackQuery, state:FSMContext):
 @router.message(Fract.parametrs)
 async def parametr(message:Message,state:FSMContext):
     parametrs = message.text
+    if not parametrs:
+        await message.answer('❌ Отправьте параметры текстовым сообщением.')
+        return
     await state.update_data(parametrs=parametrs)
     data = await state.get_data()
     fractal_type = data.get('Fractal')
@@ -240,6 +244,7 @@ async def parametr(message:Message,state:FSMContext):
             return
         elif not 0 <= int(message.text) <= 10:
             await message.answer('❌ ошибка введите от 0 до 10')
+            return
         else:
             await message.answer('✅ Числа сохранены! Генерирую фрактал...')
             size_str = data['size']
@@ -264,8 +269,10 @@ async def parametr(message:Message,state:FSMContext):
             return
         elif int(message.text) < 20:
             await message.answer('❌ ошибка введите от 20 до 100')
+            return
         elif int(message.text) > 100:
             await message.answer('❌ ошибка введите от 20 до 100')
+            return
         else:
             await message.answer('✅ Числа сохранены! Генерирую фрактал...')
             size = data['size']
@@ -289,8 +296,9 @@ async def parametr(message:Message,state:FSMContext):
         if not message.text.isdigit():
             await message.answer(TEXT_KOCH,parse_mode='HTML')
             return
-        elif int(message.text) > 8:
+        elif int(message.text) > 7:
             await message.answer('❌ ошибка введите от 0 до 7')
+            return
         else:
             await message.answer('✅ Числа сохранены! Генерирую фрактал...')
             size = data['size']
@@ -312,8 +320,9 @@ async def parametr(message:Message,state:FSMContext):
         if not message.text.isdigit():
             await message.answer(TEXT_PIFAGOR,parse_mode='HTML')
             return
-        elif int(message.text) > 10:
-            await message.answer('❌ ошибка введите от 0 до 10')
+        elif not 1 <= int(message.text) <= 10:
+            await message.answer('❌ ошибка введите от 1 до 10')
+            return
         else:
             await message.answer('✅ Числа сохранены! Генерирую фрактал...')
             size = data['size']
@@ -330,14 +339,20 @@ async def parametr(message:Message,state:FSMContext):
         if len(parts) != 2:
             await message.answer('❌ Для Жюлиа нужно ДВА числа через пробел!\nПример: -0.7 0.27')
             return
-        c_real = float(parts[0])
-        c_image = float(parts[1])
-        
-        if c_real < -3 or c_real > 3:
-            await message.answer('❌ ошибка введите от -3 до 3')
+        try:
+            c_real = float(parts[0])
+            c_image = float(parts[1])
+        except ValueError:
+            await message.answer(
+            "❌ Оба значения должны быть числами. Например: -0.7 0.27"
+            )
             return
-        elif c_image < -3 or c_image > 3:
-            await message.answer('❌ ошибка введите от -3 до 3')
+        if not math.isfinite(c_real) or not math.isfinite(c_image):
+            await message.answer("❌ Нужны обычные числа, без nan и inf.")
+            return
+
+        if not -3 <= c_real <= 3 or not -3 <= c_image <= 3:
+            await message.answer("❌ Каждое число должно быть от -3 до 3.")
             return
         await message.answer('✅ Числа сохранены! Генерирую фрактал...')
         size = data['size']

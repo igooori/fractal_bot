@@ -11,14 +11,20 @@ router = Router()
 async def histori(message:Message):
     user_id = message.from_user.id
     with Session(bind=engine) as db:
-        response = "<b>🎨 Популярные фракталы:</b>\n\n"
+        response = "<b>🎨 История ваших фракталов:</b>\n\n"
         histori = db.query(Histori).filter(Histori.user_id == user_id).all()
+        if not histori:
+            await message.answer(
+                "📭 Вы ещё не создали ни одного фрактала.\n"
+                "Начните с /fractal"
+            )
+            return
         for historis in histori:
             params = historis.parameters
             fractal_icons = {
             'julia': '🌀 Жюлиа',
             'mandelbrot': '🎯 Мандельброт',
-            'сserpinski': '🔺 Серпинский',
+            'serpinski': '🔺 Серпинский',
             'koch': '❄️ Кох',
             'pifagor': '🌳 Дерево Пифагора'
             }
