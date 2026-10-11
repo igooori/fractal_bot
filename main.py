@@ -19,9 +19,10 @@ bot = Bot(token=TOKEN)
 dp = Dispatcher(storage=MemoryStorage())
 async def main():
     dp.include_router(router_start)
-    dp.include_router(router_fractal)
     dp.include_router(histori_router)
+    dp.include_router(router_fractal)
     dp.include_router(admin_router)
+    print('Бот запущен')
     await set_my(bot)
     await dp.start_polling(bot)
     

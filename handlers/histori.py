@@ -4,11 +4,13 @@ from aiogram.filters import Command
 from sqlalchemy.orm import Session
 from models.base import Histori,engine
 from handlers.fractal import parametr
+from aiogram.fsm.context import FSMContext
 import json
 router = Router()
 
 @router.message(Command('histori'))
-async def histori(message:Message):
+async def histori(message:Message, state:FSMContext):
+    await state.clear()
     user_id = message.from_user.id
     with Session(bind=engine) as db:
         response = "<b>🎨 История ваших фракталов:</b>\n\n"

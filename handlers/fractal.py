@@ -180,7 +180,7 @@ async def size_1024(callback: CallbackQuery, state: FSMContext):
     await callback.answer()
 @router.callback_query(F.data == 'size:2048')
 async def size_2048(callback: CallbackQuery, state: FSMContext):
-    txt = """✨ **Параметр сохранён: 1024 × 1024**
+    txt = """✨ **Параметр сохранён: 2048 x 2048**
 """
     await state.update_data(size='2048x2048')
     await callback.message.edit_text(txt,parse_mode='MarkdownV2',reply_markup=keyboard_color)
@@ -201,7 +201,7 @@ async def red(callback: CallbackQuery, state: FSMContext):
     await state.update_data(color='red')
     await callback.message.delete()
     await callback.message.answer(
-        '✅ Цвет сохранён: крсаный',
+        '✅ Цвет сохранён: красный',
         reply_markup=keyboard_gotovo
     )
     await state.set_state(Fract.parametrs)
@@ -332,6 +332,13 @@ async def parametr(message:Message,state:FSMContext):
             image = draw_pifagor(color_name=color,width=width,height=height,depth=depth,lines_width=2)
             file = BufferedInputFile(image.getvalue(),filename="fractal.png")
             await message.answer_photo(file,caption='Вот твой фрактал Дерево пифагора!')
+            with Session(bind=engine) as db:
+                hustori = Histori(
+                user_id = message.from_user.id,
+                parameters = data
+                )
+                db.add(hustori)
+                db.commit()
             await state.clear()
 
     if fractal_type == 'julia':
